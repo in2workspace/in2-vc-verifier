@@ -67,6 +67,19 @@ dependencies {
 	implementation 'org.json:json:20230227'
 	// QR GENERATOR
 	implementation 'com.github.kenglxn.QRGen:javase:3.0.1'
+	//Europa DSS https://ec.europa.eu/digital-building-blocks/DSS/webapp-demo/doc/dss-documentation.html
+	implementation("eu.europa.ec.joinup.sd-dss:dss-jades:5.13.RC1")
+	implementation("eu.europa.ec.joinup.sd-dss:dss-token:5.13.RC1")
+	implementation 'eu.europa.ec.joinup.sd-dss:dss-service:5.13.RC1'
+	implementation 'eu.europa.ec.joinup.sd-dss:dss-utils-google-guava:5.13.RC1'
+	implementation 'eu.europa.ec.joinup.sd-dss:dss-tsl-validation:5.13.RC1'
+
+	//To convert the XML policies
+	implementation 'com.sun.xml.bind:jaxb-core:2.3.0.1'
+	implementation 'javax.xml.bind:jaxb-api:2.3.1'
+	implementation 'com.sun.xml.bind:jaxb-impl:2.3.1'
+	implementation 'org.javassist:javassist:3.25.0-GA'
+
 	// DevTools
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'

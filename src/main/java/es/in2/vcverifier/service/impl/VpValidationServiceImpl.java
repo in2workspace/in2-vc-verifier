@@ -6,6 +6,7 @@ import es.in2.vcverifier.model.KeyType;
 import es.in2.vcverifier.model.LEARCredentialEmployee;
 import es.in2.vcverifier.service.DIDService;
 import es.in2.vcverifier.service.JWTService;
+import es.in2.vcverifier.service.ValidationJADESService;
 import es.in2.vcverifier.service.VpValidationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -47,6 +48,7 @@ public class VpValidationServiceImpl implements VpValidationService {
     private final DIDService didService; // Service for handling trusted DIDs
     private final JWTService jwtService; // Service for JWT-related validations
     private final ObjectMapper objectMapper;
+    private final ValidationJADESService validationJADESService;
     private static final String ISSUER_ID_FILE_PATH = "src/main/resources/static/issuer_id_list.txt";
     private static final String PARTICIPANTS_ID_FILE_PATH = "src/main/resources/static/participants_id_list.txt";
 
@@ -70,7 +72,9 @@ public class VpValidationServiceImpl implements VpValidationService {
             // Step 3: Extract the public key from JWT header and verify the signature
             Map<String, Object> vcHeader = jwtCredential.getHeader().toJSONObject();
             PublicKey certificatePubKey = extractPubKeyAndVerifyCertificate(vcHeader, credentialIssuerDid.substring("did:elsi:".length())); // Extract public key from x5c certificate and validate OrganizationIdentifier
-
+            if (!validationJADESService.validate(jwtCredential.serialize())){
+                throw new RuntimeException();
+            }
 //            jwtService.verifyJWTSignature(jwtCredential.serialize(), certificatePubKey, KeyType.RSA);  // Use JWTService to verify signature
 
             // Step 4: Extract the mandateeId from the Verifiable Credential
