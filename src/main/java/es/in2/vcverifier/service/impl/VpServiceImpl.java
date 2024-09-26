@@ -10,7 +10,7 @@ import es.in2.vcverifier.model.LEARCredentialEmployee;
 import es.in2.vcverifier.model.LEARCredentialMachine;
 import es.in2.vcverifier.model.LEARCredentialType;
 import es.in2.vcverifier.service.JWTService;
-import es.in2.vcverifier.service.TrustFrameworkService;
+import es.in2.vcverifier.service.AllowedClientsService;
 import es.in2.vcverifier.service.VpService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -48,7 +48,7 @@ public class VpServiceImpl implements VpService {
 
     private final JWTService jwtService;
     private final ObjectMapper objectMapper;
-    private final TrustFrameworkService trustFrameworkService;
+    private final AllowedClientsService allowedClientsService;
 
 
     @Override
@@ -61,7 +61,7 @@ public class VpServiceImpl implements VpService {
             // Step 2: Validate the issuer
             String credentialIssuerDid = jwtService.getClaimFromPayload(payload,"iss");
 
-            if (!trustFrameworkService.isIssuerIdAllowed(credentialIssuerDid)) {
+            if (!allowedClientsService.isIssuerIdAllowed(credentialIssuerDid)) {
                 log.error("Issuer DID {} is not a trusted participant", credentialIssuerDid);
                 return false;
             }
@@ -91,7 +91,7 @@ public class VpServiceImpl implements VpService {
                 throw new InvalidCredentialTypeException("Invalid Credential Type. LEARCredentialEmployee or LEARCredentialMachine required.");
             }
 
-            if (!trustFrameworkService.isParticipantIdAllowed(mandateeId)) {
+            if (!allowedClientsService.isParticipantIdAllowed(mandateeId)) {
                 log.error("Mandatee ID {} is not in the allowed list", mandateeId);
                 return false;
             }

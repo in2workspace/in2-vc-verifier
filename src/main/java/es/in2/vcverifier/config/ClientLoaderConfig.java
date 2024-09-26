@@ -3,7 +3,7 @@ package es.in2.vcverifier.config;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import es.in2.vcverifier.model.ClientData;
-import es.in2.vcverifier.service.TrustFrameworkService;
+import es.in2.vcverifier.service.AllowedClientsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -24,7 +24,7 @@ import java.util.UUID;
 public class ClientLoaderConfig {
 
     private final ObjectMapper objectMapper;
-    private final TrustFrameworkService trustFrameworkService;
+    private final AllowedClientsService allowedClientsService;
 
     @Bean
     public RegisteredClientRepository registeredClientRepository() {
@@ -35,7 +35,7 @@ public class ClientLoaderConfig {
     private List<RegisteredClient> loadClients() {
         try {
             // Leer el archivo JSON
-            String clientsJson = trustFrameworkService.fetchAllowedClient();
+            String clientsJson = allowedClientsService.fetchAllowedClient();
             List<ClientData> clientsData = objectMapper.readValue(clientsJson, new TypeReference<>() {
             });
 
