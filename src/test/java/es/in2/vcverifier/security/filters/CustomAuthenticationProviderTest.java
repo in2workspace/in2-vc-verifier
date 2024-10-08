@@ -5,8 +5,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jose.jwk.ECKey;
 import es.in2.vcverifier.config.properties.SecurityProperties;
 import es.in2.vcverifier.crypto.CryptoComponent;
-import es.in2.vcverifier.exception.InvalidCredentialTypeException;
-import es.in2.vcverifier.model.credentials.employee.*;
+import es.in2.vcverifier.model.credentials.employee.CredentialSubjectLCEmployee;
+import es.in2.vcverifier.model.credentials.employee.LEARCredentialEmployee;
+import es.in2.vcverifier.model.credentials.employee.MandateLCEmployee;
+import es.in2.vcverifier.model.credentials.employee.MandateeLCEmployee;
 import es.in2.vcverifier.model.credentials.machine.CredentialSubjectLCMachine;
 import es.in2.vcverifier.model.credentials.machine.LEARCredentialMachine;
 import es.in2.vcverifier.model.credentials.machine.MandateLCMachine;
@@ -38,7 +40,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class CustomAuthenticationProviderTest {
+class CustomAuthenticationProviderTest {
 
     @Mock
     private CryptoComponent cryptoComponent;
