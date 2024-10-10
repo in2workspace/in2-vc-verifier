@@ -36,8 +36,12 @@ import org.springframework.security.oauth2.server.authorization.OAuth2Authorizat
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.config.annotation.web.configuration.OAuth2AuthorizationServerConfiguration;
 import org.springframework.security.oauth2.server.authorization.config.annotation.web.configurers.OAuth2AuthorizationServerConfigurer;
+import org.springframework.security.oauth2.server.authorization.oidc.OidcProviderConfiguration;
 import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
 import org.springframework.security.web.SecurityFilterChain;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @Configuration
 @RequiredArgsConstructor
@@ -62,6 +66,14 @@ public class AuthorizationServerConfig {
 
         http
                 .getConfigurer(OAuth2AuthorizationServerConfigurer.class)
+                .authorizationServerMetadataEndpoint(authorizationServerMetadataEndpoint ->
+                        authorizationServerMetadataEndpoint
+                                .authorizationServerMetadataCustomizer(metadata -> {
+                                    metadata.claims(claims -> {
+                                        claims.put("custom_claim", "custom_value");
+                                    });
+                        })
+                )
                 .authorizationEndpoint(authorizationEndpoint ->
                         authorizationEndpoint
                                 // Adds an AuthenticationConverter (pre-processor) used when attempting to extract
@@ -69,15 +81,20 @@ public class AuthorizationServerConfig {
                                 // of OAuth2AuthorizationCodeRequestAuthenticationToken or OAuth2AuthorizationConsentAuthenticationToken.
                                 .authorizationRequestConverter(new CustomAuthorizationRequestConverter(didService,jwtService,cryptoComponent,cacheStoreForAuthorizationRequestJWT,cacheStoreForOAuth2AuthorizationRequest,securityProperties))
                                 .errorResponseHandler(new CustomErrorResponseHandler())
+
                 )
                 .tokenEndpoint(tokenEndpoint ->
                         tokenEndpoint
                                 .accessTokenRequestConverter(new CustomTokenRequestConverter(jwtService, clientAssertionValidationService, vpService, cacheStoreForAuthorizationCodeData,oAuth2AuthorizationService(),objectMapper))
                                 .authenticationProvider(new CustomAuthenticationProvider(cryptoComponent,jwtService,registeredClientRepository,securityProperties,objectMapper))
                 )
-                .oidc(Customizer.withDefaults());    // Enable OpenID Connect 1.0
+                .oidc(Customizer.withDefaults());
+        // Enable OpenID Connect 1.0
+
         return http.build();
     }
+
+
     @Bean
     public JWKSource<SecurityContext> jwkSource() {
         JWKSet jwkSet = new JWKSet(cryptoComponent.getECKey());
@@ -99,8 +116,51 @@ public class AuthorizationServerConfig {
     }
 
 
+//    @Bean
+//    public OidcProviderConfiguration oidcProviderConfiguration() {
+//        // Create a map to hold your claims
+//        Map<String, Object> claims = new HashMap<>();
+//
+////        // Add default claims
+////        claims.put("issuer", securityProperties.authorizationServer());
+////        claims.put("authorization_endpoint", securityProperties.authorizationServer() + "/oidc/authorize");
+////        claims.put("device_authorization_endpoint", securityProperties.authorizationServer() + "/oidc/device_authorization");
+////        claims.put("token_endpoint", securityProperties.authorizationServer() + "/oidc/token");
+////        claims.put("token_endpoint_auth_methods_supported", new String[] {"client_secret_basic", "client_secret_post","client_secret_jwt","private_key_jwt","tls_client_auth","self_signed_tls_client_auth"});
+////        claims.put("jwks_uri", securityProperties.authorizationServer() + "/oidc/jwks");
+////        claims.put("userinfo_endpoint", securityProperties.authorizationServer() + "/oidc/userinfo");
+////        claims.put("end_session_endpoint", securityProperties.authorizationServer() + "/oidc/logout");
+////        claims.put("response_types_supported", new String[] {"code"});
+////        claims.put("grant_types_supported", new String[] {"authorization_code","client_credentials","refresh_token","urn:ietf:params:oauth:grant-type:device_code","urn:ietf:params:oauth:grant-type:token-exchange"});
+////        claims.put("revocation_endpoint", securityProperties.authorizationServer() + "/oidc/revoke");
+////        claims.put("revocation_endpoint_auth_methods_supported", new String[] {"client_secret_basic","client_secret_post","client_secret_jwt","private_key_jwt","tls_client_auth","self_signed_tls_client_auth"});
+////        claims.put("introspection_endpoint", securityProperties.authorizationServer() + "/oidc/introspect");
+////        claims.put("introspection_endpoint_auth_methods_supported", new String[] {"client_secret_basic","client_secret_post","client_secret_jwt","private_key_jwt","tls_client_auth","self_signed_tls_client_auth"});
+////        claims.put("code_challenge_methods_supported", new String[] {"S256"});
+////        claims.put("tls_client_certificate_bound_access_tokens", true);
+//
+//        // Add custom claim
+//        claims.put("request_uri_parameter_supported", "true"); // Add your custom property
+//
+//        // Build the OidcProviderConfiguration with the claims
+//        return OidcProviderConfiguration.withClaims(claims)
+//                .subjectTypes(subjectTypes -> subjectTypes.add("public")) // Add subject types if needed
+//                .idTokenSigningAlgorithm("RS256") // Set signing algorithm if needed
+//                .issuer(securityProperties.authorizationServer())
+//                .authorizationEndpoint(securityProperties.authorizationServer() + "/oidc/authorize")
+//                .deviceAuthorizationEndpoint(securityProperties.authorizationServer() + "/oidc/device_authorization")
+//                .tokenEndpoint(securityProperties.authorizationServer() + "/oidc/token")
+//                .tokenIntrospectionEndpoint(securityProperties.authorizationServer() + "/oidc/introspect")
+//                .tokenRevocationEndpoint(securityProperties.authorizationServer() + "/oidc/revoke")
+//                .jwkSetUrl(securityProperties.authorizationServer() + "/oidc/jwks")
+//                .endSessionEndpoint(securityProperties.authorizationServer() + "/oidc/logout")
+//                .userInfoEndpoint(securityProperties.authorizationServer() + "/oidc/userinfo")
+//                .clientRegistrationEndpoint(securityProperties.authorizationServer() + "/oidc/register")
+//                .responseTypes(responseTypes -> responseTypes.add("code"))
+//                .build();
+//    }
 
-    // Customiza los endpoint del Authorization Server
+    //Customiza los endpoint del Authorization Server
     @Bean
     public AuthorizationServerSettings authorizationServerSettings() {
         return AuthorizationServerSettings.builder()
@@ -115,6 +175,7 @@ public class AuthorizationServerConfig {
                 .oidcLogoutEndpoint("/oidc/logout")
                 .oidcUserInfoEndpoint("/oidc/userinfo")
                 .oidcClientRegistrationEndpoint("/oidc/register")
+                .setting("test","test")
                 .build();
     }
 
